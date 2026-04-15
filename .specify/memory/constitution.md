@@ -1,50 +1,44 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Google Docs MCP Server Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Security & Privacy First
+All features must prioritize user data protection. Every user must have passphrase-scoped token isolation. Tokens must be encrypted at rest using AES-256-GCM with application-layer encryption. Passphrases must be generated with sufficient entropy (~39 bits) to resist brute-force attacks, complemented by strict rate limiting and lockout policies.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Serverless & Global Scalability
+The solution must be built for Cloudflare Workers to ensure a serverless, globally distributed architecture with zero cold starts. All state must be managed via Cloudflare KV with appropriate TTLs for session management and rate limiting.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Native Claude.ai Integration (MCP/SSE)
+The server must implement the Model Context Protocol (MCP) using Server-Sent Events (SSE) transport. This ensures a native and seamless integration experience for Claude.ai users, allowing them to interact with Google Docs through standard tools.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Markdown-to-Docs Fidelity
+The system must faithfully convert Markdown content provided by the LLM into native Google Docs formatting using the Google Docs API `batchUpdate`. This includes support for headings, lists, tables, inline styling (bold, italic, code, links), and horizontal rules.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Robust Two-Pass Conversion Algorithm
+To ensure character index stability during document modification, the conversion process must follow a two-pass strategy:
+1. **Pass 1:** Insert all plain text content to establish the character index map.
+2. **Pass 2:** Apply all formatting and styles (ordered by descending index) to prevent index shifting.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Security & Architecture Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Multi-Tenant Isolation
+Each user is a separate tenant identified by a unique passphrase. No shared bearer tokens or global access credentials are permitted. Token refresh operations must use a compare-and-swap pattern to avoid race conditions.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Minimal Permissions
+The application must request only the minimum necessary Google OAuth2 scopes: `documents` for content manipulation and `drive.file` for document discovery and access verification.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### URL & Input Validation
+All document URLs must be strictly validated via regex to ensure they point only to `docs.google.com/document/d/{id}` before any processing occurs.
+
+## Development Workflow & Quality Gates
+
+### Test-Driven Development (TDD)
+TDD is mandatory for all core logic, particularly the Markdown-to-Docs converter and the Authentication/Encryption modules. Every bug fix must include a reproduction test case.
+
+### Continuous Validation
+All changes must be validated against the conversion logic to ensure no regressions in formatting or index calculation. Integration tests must verify the OAuth flow and MCP tool execution.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This Constitution supersedes all other development practices. Any divergence from these principles requires a formal architectural review and an update to the project documentation. All pull requests must be verified against this Constitution for compliance.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-04-15 | **Last Amended**: 2026-04-15

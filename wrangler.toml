@@ -1,0 +1,18 @@
+name = "gdocs-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-04-15"
+
+[[kv_namespaces]]
+binding = "GDOCS_TOKENS"
+id = "GDOCS_TOKENS_ID" # Placeholder, user needs to create this
+
+[[kv_namespaces]]
+binding = "GDOCS_SESSIONS"
+id = "GDOCS_SESSIONS_ID" # Placeholder, user needs to create this
+
+[[kv_namespaces]]
+binding = "GDOCS_RATELIMIT"
+id = "GDOCS_RATELIMIT_ID" # Placeholder, user needs to create this
+
+[observability]
+enabled = true
