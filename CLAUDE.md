@@ -1,12 +1,8 @@
 # Claude.ai Development & Usage Guidelines — Google Docs MCP Server
 
-## Current Status: ✅ Core Tools Functional
+## Current Status: ✅ Core Tools Functional & CI Enabled
 
-All core tools are fully implemented and verified. You have full access to:
-
-- `google_docs_read`: High-fidelity Docs-to-Markdown conversion.
-- `google_docs_write`: Full document creation/overwriting with style mapping.
-- `google_docs_update_section`: Precision heading-based content updates.
+All core tools are fully implemented and verified. The project is backed by a CI pipeline ensuring all changes pass formatting, linting, and tests.
 
 ---
 
@@ -44,3 +40,4 @@ If a tool call fails with an authentication error:
 - **Wait for Confirmation:** Always confirm with the user before performing a `mode="replace"` operation on an existing document.
 - **Explain Formatting:** If you're creating a complex document, briefly explain how the Markdown will be rendered (e.g., "I'll use Heading 1 for the title and a table for the itinerary").
 - **Error Handling:** If a Google Docs URL is invalid, inform the user and request the correct format: `https://docs.google.com/document/d/{doc_id}/edit`.
+- **CI Compliance:** Ensure all code changes pass `npm run lint`, `npm run typecheck`, and `npm test` before concluding a task.

@@ -1,8 +1,8 @@
 # Gemini CLI Development Guidelines — Google Docs MCP Server
 
-## Project Progress: ✅ All Tasks Complete (T001-T035)
+## Project Progress: ✅ MVP Complete & CI Enabled
 
-The MVP development is complete. All user stories (Auth, Read/Write, Section Updates) are implemented and verified via unit and integration tests. The server is ready for production use on Cloudflare Workers.
+The MVP development is complete. All user stories (Auth, Read/Write, Section Updates) are implemented and verified. A GitHub Actions CI pipeline is active for automated testing, linting, and type-checking.
 
 ---
 
@@ -10,6 +10,7 @@ The MVP development is complete. All user stories (Auth, Read/Write, Section Upd
 
 - **Runtime**: Cloudflare Workers
 - **Framework**: Model Context Protocol (MCP) SDK
+- **CI/CD**: GitHub Actions
 - **APIs**: Google Docs, Google Drive
 - **Storage**: Cloudflare KV
 - **Testing**: Vitest, Miniflare
@@ -31,6 +32,9 @@ src/
 
 - `npm run dev`: Local development via Wrangler
 - `npm test`: Run Vitest tests
+- `npm run lint`: Run ESLint checks
+- `npm run typecheck`: Run TypeScript type checks
+- `npm run format`: Format code with Prettier
 - `wrangler deploy`: Deploy to Cloudflare
 - `wrangler secret put <KEY>`: Set environment secrets
 
