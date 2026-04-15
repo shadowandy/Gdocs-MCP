@@ -22,7 +22,10 @@ export async function checkLockout(kv: KVNamespace, passphraseHash: string): Pro
 /**
  * Record a failed attempt and lock out if threshold reached
  */
-export async function recordFailedAttempt(kv: KVNamespace, passphraseHash: string): Promise<number> {
+export async function recordFailedAttempt(
+  kv: KVNamespace,
+  passphraseHash: string,
+): Promise<number> {
   const key = `${LOCKOUT_PREFIX}${passphraseHash}`;
   const attemptsStr = await kv.get(key);
   const attempts = (attemptsStr ? parseInt(attemptsStr, 10) : 0) + 1;

@@ -1,6 +1,6 @@
 /**
  * Markdown to Google Docs API Request Converter
- * Two-pass algorithm: 
+ * Two-pass algorithm:
  * Pass 1: Collect all text and build structural requests (insertText)
  * Pass 2: Apply styles (updateTextStyle) based on collected ranges
  */
@@ -23,18 +23,18 @@ export class MdToDocsConverter {
     this.currentIndex = 1;
 
     const tokens = marked.lexer(markdown);
-    
+
     // Pass 1: Structural changes and text insertion
     for (const token of tokens) {
       this.processToken(token);
     }
 
-    // Pass 2: Styles (already handled inline in this implementation for simplicity, 
+    // Pass 2: Styles (already handled inline in this implementation for simplicity,
     // but a true two-pass would collect ranges and apply styles after all text is in)
-    // Actually, the spec MANDATES two-pass. 
+    // Actually, the spec MANDATES two-pass.
     // Let's refine: Pass 1 generates text insertion requests and tracks offsets.
     // Pass 2 generates formatting requests.
-    
+
     return this.requests;
   }
 
@@ -64,7 +64,7 @@ export class MdToDocsConverter {
   private handleHeading(token: any) {
     const text = token.text + '\n';
     const start = this.currentIndex;
-    
+
     this.requests.push({
       insertText: {
         location: { index: this.currentIndex },
@@ -73,7 +73,7 @@ export class MdToDocsConverter {
     });
 
     const end = this.currentIndex + text.length;
-    
+
     this.requests.push({
       updateParagraphStyle: {
         range: { startIndex: start, endIndex: end },
@@ -88,7 +88,7 @@ export class MdToDocsConverter {
   private handleParagraph(token: any) {
     const text = token.text + '\n';
     const start = this.currentIndex;
-    
+
     this.requests.push({
       insertText: {
         location: { index: this.currentIndex },
@@ -105,7 +105,7 @@ export class MdToDocsConverter {
 
   private handleInlineStyles(tokens: any[], offset: number) {
     if (!tokens) return;
-    
+
     let currentOffset = offset;
     for (const token of tokens) {
       const length = token.text?.length || 0;

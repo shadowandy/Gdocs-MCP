@@ -6,7 +6,7 @@ import { createMcpServer, handleMcpSseRequest } from './mcp/server';
 import { Errors, log } from './utils/errors';
 import { generateAuthUrl, exchangeCodeForTokens } from './auth/oauth';
 import { generatePassphrase, hashPassphrase } from './auth/passphrase';
-import { storeTokens, getTokens } from './auth/tokens';
+import { storeTokens } from './auth/tokens';
 
 export interface Env {
   GDOCS_TOKENS: KVNamespace;
@@ -18,16 +18,15 @@ export interface Env {
   REDIRECT_URI: string;
 }
 
-const server = createMcpServer();
-
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     try {
       // 1. MCP SSE Connection
       if (url.pathname === '/mcp/sse') {
-        return await handleMcpSseRequest(request, env, server);
+        const mcpServer = createMcpServer(env);
+        return await handleMcpSseRequest(request, env, mcpServer);
       }
 
       // 2. Auth Endpoints
@@ -37,7 +36,7 @@ export default {
         const state = crypto.randomUUID();
         // Store state -> passphrase mapping for callback
         await env.GDOCS_SESSIONS.put(`state:${state}`, passphrase, { expirationTtl: 600 });
-        
+
         const authUrl = await generateAuthUrl(env, state);
         return Response.redirect(authUrl);
       }
@@ -56,7 +55,7 @@ export default {
           throw Errors.Unauthorized('Invalid or expired state');
         }
 
-        const tokenData = await exchangeCodeForTokens(env, code);
+        const tokenData = (await exchangeCodeForTokens(env, code)) as any;
         const passphraseHash = await hashPassphrase(passphrase);
 
         await storeTokens(env, passphraseHash, {
@@ -70,17 +69,20 @@ export default {
         // Store the final status for the user to retrieve
         await env.GDOCS_SESSIONS.put(`status:${passphrase}`, 'COMPLETED', { expirationTtl: 3600 });
 
-        return new Response(`Authentication successful! Your passphrase is: ${passphrase}\n\nKeep this SECURE. It is the only way to access your account.`, {
-          status: 200,
-          headers: { 'Content-Type': 'text/plain' },
-        });
+        return new Response(
+          `Authentication successful! Your passphrase is: ${passphrase}\n\nKeep this SECURE. It is the only way to access your account.`,
+          {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' },
+          },
+        );
       }
 
       // GET /auth/status/{passphrase}
       if (url.pathname.startsWith('/auth/status/') && request.method === 'GET') {
         const passphrase = url.pathname.replace('/auth/status/', '');
         const status = await env.GDOCS_SESSIONS.get(`status:${passphrase}`);
-        
+
         if (!status) {
           return new Response(JSON.stringify({ status: 'NOT_FOUND' }), {
             status: 404,

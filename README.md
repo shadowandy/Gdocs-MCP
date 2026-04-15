@@ -7,6 +7,7 @@ This guide will help you set up your own private Google Docs MCP server on Cloud
 ## 🏗️ Phase 1: Prerequisites
 
 Before we start, make sure you have the following:
+
 1. **A Google Account**: To access Google Docs.
 2. **A Cloudflare Account**: [Sign up here](https://dash.cloudflare.com/sign-up) (The free tier is perfectly fine).
 3. **Node.js installed**: [Download here](https://nodejs.org/) (Choose the "LTS" version).
@@ -19,12 +20,14 @@ Before we start, make sure you have the following:
 Open your terminal (Command Prompt on Windows, Terminal on Mac) and run these commands:
 
 1. **Clone the project:**
+
    ```bash
    git clone https://github.com/your-username/gdocs-mcp.git
    cd gdocs-mcp
    ```
 
 2. **Install the project dependencies:**
+
    ```bash
    npm install
    ```
@@ -83,6 +86,7 @@ npx wrangler secret put ENCRYPTION_KEY
 
 1. **Create the KV Namespaces (Databases):**
    Run these three commands and **copy the ID** provided for each:
+
    ```bash
    npx wrangler kv:namespace create GDOCS_TOKENS
    npx wrangler kv:namespace create GDOCS_SESSIONS
@@ -96,7 +100,7 @@ npx wrangler secret put ENCRYPTION_KEY
    ```bash
    npx wrangler deploy
    ```
-   *Take note of the URL provided at the end (e.g., `https://gdocs-mcp.your-name.workers.dev`).*
+   _Take note of the URL provided at the end (e.g., `https://gdocs-mcp.your-name.workers.dev`)._
 
 ---
 
@@ -124,6 +128,7 @@ npx wrangler secret put ENCRYPTION_KEY
      }
    }
    ```
+
 4. **Restart Claude Desktop.**
 
 ---

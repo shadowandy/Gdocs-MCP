@@ -31,7 +31,7 @@ export class DocsToMdConverter {
     }
 
     const style = paragraph.paragraphStyle?.namedStyleType || 'NORMAL_TEXT';
-    
+
     if (style.startsWith('HEADING_')) {
       const level = parseInt(style.split('_')[1], 10);
       return '#'.repeat(level) + ' ' + text.trim() + '\n\n';
@@ -60,7 +60,7 @@ export class DocsToMdConverter {
   private processTable(table: any): string {
     let markdown = '|';
     const rows = table.tableRows || [];
-    
+
     // Header
     if (rows.length > 0) {
       const firstRow = rows[0].tableCells || [];

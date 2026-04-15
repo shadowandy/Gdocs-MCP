@@ -40,7 +40,7 @@ export async function updateSection(
     },
     // Insert new content at the start of where the old section was
     // Note: This is simplified. In a real two-pass, offsets would need careful adjustment.
-    ...requests.map(req => {
+    ...requests.map((req) => {
       if (req.insertText) {
         req.insertText.location.index += sectionRange.startIndex - 1;
       }

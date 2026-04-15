@@ -7,28 +7,36 @@ describe('Converter - Markdown to Docs', () => {
 
   it('should convert headings', async () => {
     const requests = await converter.convert('# Heading 1\n## Heading 2');
-    expect(requests).toContainEqual(expect.objectContaining({
-      insertText: expect.objectContaining({ text: 'Heading 1\n' })
-    }));
-    expect(requests).toContainEqual(expect.objectContaining({
-      updateParagraphStyle: expect.objectContaining({
-        paragraphStyle: { namedStyleType: 'HEADING_1' }
-      })
-    }));
+    expect(requests).toContainEqual(
+      expect.objectContaining({
+        insertText: expect.objectContaining({ text: 'Heading 1\n' }),
+      }),
+    );
+    expect(requests).toContainEqual(
+      expect.objectContaining({
+        updateParagraphStyle: expect.objectContaining({
+          paragraphStyle: { namedStyleType: 'HEADING_1' },
+        }),
+      }),
+    );
   });
 
   it('should convert bold and italic', async () => {
     const requests = await converter.convert('**bold** and *italic*');
-    expect(requests).toContainEqual(expect.objectContaining({
-      updateTextStyle: expect.objectContaining({
-        textStyle: { bold: true }
-      })
-    }));
-    expect(requests).toContainEqual(expect.objectContaining({
-      updateTextStyle: expect.objectContaining({
-        textStyle: { italic: true }
-      })
-    }));
+    expect(requests).toContainEqual(
+      expect.objectContaining({
+        updateTextStyle: expect.objectContaining({
+          textStyle: { bold: true },
+        }),
+      }),
+    );
+    expect(requests).toContainEqual(
+      expect.objectContaining({
+        updateTextStyle: expect.objectContaining({
+          textStyle: { italic: true },
+        }),
+      }),
+    );
   });
 });
 
@@ -41,11 +49,11 @@ describe('Converter - Docs to Markdown', () => {
         content: [
           {
             paragraph: {
-              elements: [{ textRun: { content: 'Hello World' } }]
-            }
-          }
-        ]
-      }
+              elements: [{ textRun: { content: 'Hello World' } }],
+            },
+          },
+        ],
+      },
     };
     const markdown = converter.convert(doc);
     expect(markdown).toContain('Hello World');
@@ -58,11 +66,11 @@ describe('Converter - Docs to Markdown', () => {
           {
             paragraph: {
               paragraphStyle: { namedStyleType: 'HEADING_1' },
-              elements: [{ textRun: { content: 'Title' } }]
-            }
-          }
-        ]
-      }
+              elements: [{ textRun: { content: 'Title' } }],
+            },
+          },
+        ],
+      },
     };
     const markdown = converter.convert(doc);
     expect(markdown).toBe('# Title\n\n');

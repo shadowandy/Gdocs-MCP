@@ -6,15 +6,15 @@ A multi-tenant MCP (Model Context Protocol) server running on Cloudflare Workers
 
 ### Key design decisions
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Runtime | Cloudflare Workers | Serverless, globally distributed, zero cold start |
-| Auth model | Google OAuth2 (Authorization Code + PKCE) | Works with any doc the user can access |
-| Transport | MCP over SSE | Native Claude.ai integration |
-| User identity | Passphrase in URL path | No shared bearer token, easy to remember, hard to bruteforce |
-| Token storage | Cloudflare KV with application-layer encryption | Encrypted at rest + encrypted by us |
-| Content format | Markdown → Google Docs API `batchUpdate` | Claude writes markdown; Worker handles conversion |
-| Multi-tenancy | Passphrase-scoped token isolation | Each user has independent credentials |
+| Decision       | Choice                                          | Rationale                                                    |
+| -------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| Runtime        | Cloudflare Workers                              | Serverless, globally distributed, zero cold start            |
+| Auth model     | Google OAuth2 (Authorization Code + PKCE)       | Works with any doc the user can access                       |
+| Transport      | MCP over SSE                                    | Native Claude.ai integration                                 |
+| User identity  | Passphrase in URL path                          | No shared bearer token, easy to remember, hard to bruteforce |
+| Token storage  | Cloudflare KV with application-layer encryption | Encrypted at rest + encrypted by us                          |
+| Content format | Markdown → Google Docs API `batchUpdate`        | Claude writes markdown; Worker handles conversion            |
+| Multi-tenancy  | Passphrase-scoped token isolation               | Each user has independent credentials                        |
 
 ---
 
@@ -33,6 +33,7 @@ POST /mcp/{passphrase}/messages    → MCP message handler
 ### 2.2 MCP tools exposed
 
 #### `google_docs_read`
+
 ```json
 {
   "name": "google_docs_read",
@@ -51,6 +52,7 @@ POST /mcp/{passphrase}/messages    → MCP message handler
 ```
 
 #### `google_docs_write`
+
 ```json
 {
   "name": "google_docs_write",
@@ -78,6 +80,7 @@ POST /mcp/{passphrase}/messages    → MCP message handler
 ```
 
 #### `google_docs_update_section`
+
 ```json
 {
   "name": "google_docs_update_section",
@@ -190,37 +193,40 @@ The Google Docs API operates on `batchUpdate` with a list of requests. Each requ
 
 ### 4.1 Supported conversions
 
-| Markdown | Google Docs equivalent |
-|---|---|
-| `# Heading 1` | `HEADING_1` paragraph style |
-| `## Heading 2` | `HEADING_2` paragraph style |
-| `### Heading 3` | `HEADING_3` paragraph style |
-| `**bold**` | `bold: true` text style |
-| `*italic*` | `italic: true` text style |
-| `` `inline code` `` | `weightedFontFamily: "Courier New"` text style |
-| `[text](url)` | `link: { url }` text style |
-| `- item` | `BULLET_DISC_CIRCLE_SQUARE` preset |
-| `1. item` | `NUMBERED_DECIMAL_ALPHA_ROMAN` preset |
-| `\| table \|` | `insertTable` + cell content |
-| ` ``` code ``` ` | Monospace paragraph with background colour |
-| `---` | `insertPageBreak` or horizontal rule via special chars |
-| Unicode symbols | Direct text insertion (no conversion needed) |
+| Markdown            | Google Docs equivalent                                 |
+| ------------------- | ------------------------------------------------------ |
+| `# Heading 1`       | `HEADING_1` paragraph style                            |
+| `## Heading 2`      | `HEADING_2` paragraph style                            |
+| `### Heading 3`     | `HEADING_3` paragraph style                            |
+| `**bold**`          | `bold: true` text style                                |
+| `*italic*`          | `italic: true` text style                              |
+| `` `inline code` `` | `weightedFontFamily: "Courier New"` text style         |
+| `[text](url)`       | `link: { url }` text style                             |
+| `- item`            | `BULLET_DISC_CIRCLE_SQUARE` preset                     |
+| `1. item`           | `NUMBERED_DECIMAL_ALPHA_ROMAN` preset                  |
+| `\| table \|`       | `insertTable` + cell content                           |
+| ` ``` code ``` `    | Monospace paragraph with background colour             |
+| `---`               | `insertPageBreak` or horizontal rule via special chars |
+| Unicode symbols     | Direct text insertion (no conversion needed)           |
 
 ### 4.2 Conversion strategy
 
 The converter works in **two passes**:
 
 **Pass 1 — Insert all text (plain, stripped of markdown syntax)**
+
 - Walk the AST, concatenate all text content
 - Insert as a single `insertText` request at the target index
 - This establishes the character index map
 
 **Pass 2 — Apply formatting**
+
 - Walk the AST again, this time emitting style requests
 - Each style request references the character range from Pass 1
 - Requests are ordered by descending index (Google Docs API requirement: later indices first to avoid shifting)
 
 **Tables** are handled separately:
+
 - `insertTable` at the target index with row/column counts
 - Then `insertText` into each cell by navigating the document structure
 - Cell content supports inline formatting (bold, italic, links)
@@ -243,16 +249,16 @@ For `google_docs_update_section`:
 
 ### 5.1 Threat model and mitigations
 
-| Threat | Mitigation |
-|---|---|
-| Passphrase brute-force | Rate limiting: 30 req/min per IP + passphrase lockout after 10 failed attempts in 5 min |
-| Token theft from KV | Application-layer AES-256-GCM encryption using Worker secret as key |
-| OAuth2 state hijacking | Cryptographically random state, KV-stored with 10-min TTL, validated on callback |
-| Document URL injection / SSRF | Strict regex: extract doc ID from `docs.google.com/document/d/{id}` only |
-| Google scope over-provisioning | Minimal scopes: `documents` + `drive.file` |
-| Token refresh race condition | Compare-and-swap pattern: check if token was already refreshed before writing |
-| Passphrase exposure in logs | Worker binding: never log the passphrase or tokens |
-| MCP endpoint abuse | Passphrase in URL path validated before any processing |
+| Threat                         | Mitigation                                                                              |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Passphrase brute-force         | Rate limiting: 30 req/min per IP + passphrase lockout after 10 failed attempts in 5 min |
+| Token theft from KV            | Application-layer AES-256-GCM encryption using Worker secret as key                     |
+| OAuth2 state hijacking         | Cryptographically random state, KV-stored with 10-min TTL, validated on callback        |
+| Document URL injection / SSRF  | Strict regex: extract doc ID from `docs.google.com/document/d/{id}` only                |
+| Google scope over-provisioning | Minimal scopes: `documents` + `drive.file`                                              |
+| Token refresh race condition   | Compare-and-swap pattern: check if token was already refreshed before writing           |
+| Passphrase exposure in logs    | Worker binding: never log the passphrase or tokens                                      |
+| MCP endpoint abuse             | Passphrase in URL path validated before any processing                                  |
 
 ### 5.2 Token encryption
 
@@ -274,12 +280,12 @@ Decryption:
 
 ### 5.3 KV namespace structure
 
-| Key pattern | Value | TTL |
-|---|---|---|
-| `tokens:{passphrase}` | Encrypted `{ access_token, refresh_token, expiry, email }` | None (persistent) |
-| `sessions:{state}` | `{ passphrase, created_at }` | 600s (10 min) |
-| `ratelimit:{passphrase}:{minute}` | Request count | 120s (2 min) |
-| `lockout:{passphrase}` | Lockout timestamp | 300s (5 min) |
+| Key pattern                       | Value                                                      | TTL               |
+| --------------------------------- | ---------------------------------------------------------- | ----------------- |
+| `tokens:{passphrase}`             | Encrypted `{ access_token, refresh_token, expiry, email }` | None (persistent) |
+| `sessions:{state}`                | `{ passphrase, created_at }`                               | 600s (10 min)     |
+| `ratelimit:{passphrase}:{minute}` | Request count                                              | 120s (2 min)      |
+| `lockout:{passphrase}`            | Lockout timestamp                                          | 300s (5 min)      |
 
 ---
 
@@ -307,12 +313,13 @@ id = "<your-kv-namespace-id>"
 
 ### 6.2 Worker secrets
 
-| Secret | Purpose | How to set |
-|---|---|---|
-| `GOOGLE_CLIENT_SECRET` | OAuth2 client secret from GCP | `wrangler secret put GOOGLE_CLIENT_SECRET` |
-| `ENCRYPTION_KEY` | 32-byte hex key for AES-256-GCM token encryption | `wrangler secret put ENCRYPTION_KEY` |
+| Secret                 | Purpose                                          | How to set                                 |
+| ---------------------- | ------------------------------------------------ | ------------------------------------------ |
+| `GOOGLE_CLIENT_SECRET` | OAuth2 client secret from GCP                    | `wrangler secret put GOOGLE_CLIENT_SECRET` |
+| `ENCRYPTION_KEY`       | 32-byte hex key for AES-256-GCM token encryption | `wrangler secret put ENCRYPTION_KEY`       |
 
 Generate the encryption key:
+
 ```bash
 openssl rand -hex 32
 ```
@@ -359,6 +366,7 @@ openssl rand -hex 32
 ### Step 5: Publish (optional)
 
 While in "Testing" status, only listed test users can authenticate. For family/friends:
+
 - Either add them all as test users (easiest, no review needed)
 - Or submit for verification (takes days/weeks, overkill for personal use)
 
@@ -420,11 +428,11 @@ gdocs-mcp-server/
 
 > **User**: "Write this trip itinerary to my Google Doc: https://docs.google.com/document/d/1abc.../edit"
 >
-> **Claude**: *Calls `google_docs_write` with the itinerary markdown, mode="replace"*
+> **Claude**: _Calls `google_docs_write` with the itinerary markdown, mode="replace"_
 >
 > **User**: "Update just the Day 3 section with the revised restaurant list"
 >
-> **Claude**: *Calls `google_docs_update_section` with section_heading="Day 3" and new content*
+> **Claude**: _Calls `google_docs_update_section` with section_heading="Day 3" and new content_
 
 ---
 
@@ -443,12 +451,14 @@ gdocs-mcp-server/
 ## 11. Limitations and Future Considerations
 
 ### Current limitations
+
 - **Images**: Google Docs API cannot insert images via `batchUpdate` from markdown `![](url)` syntax. Would require Drive API upload + `insertInlineImage`.
 - **Complex tables**: Merged cells and nested tables are not supported.
 - **Comments/suggestions**: Read-only; creating suggestions requires additional scope.
 - **Real-time collaboration**: The Worker does a read-modify-write; concurrent edits by other users between read and write could cause conflicts.
 
 ### Future enhancements
+
 - **Image insertion**: Upload images to Drive, then insert into doc
 - **Template support**: Pre-defined doc templates (trip itinerary, meeting notes, etc.)
 - **Batch operations**: Write to multiple docs in one tool call

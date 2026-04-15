@@ -25,11 +25,15 @@ export async function writeDoc(url: string, markdown: string, tokens: Tokens): P
 
   const batchUpdateRequests = [
     // Clear all content (except the last newline which must remain)
-    ...(endIndex > 1 ? [{
-      deleteContentRange: {
-        range: { startIndex: 1, endIndex },
-      },
-    }] : []),
+    ...(endIndex > 1
+      ? [
+          {
+            deleteContentRange: {
+              range: { startIndex: 1, endIndex },
+            },
+          },
+        ]
+      : []),
     // Add new content
     ...requests,
   ];

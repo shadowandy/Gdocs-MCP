@@ -15,11 +15,7 @@ export interface Tokens {
 /**
  * Stores tokens for a passphrase hash
  */
-export async function storeTokens(
-  env: Env,
-  passphraseHash: string,
-  tokens: Tokens,
-): Promise<void> {
+export async function storeTokens(env: Env, passphraseHash: string, tokens: Tokens): Promise<void> {
   const json = JSON.stringify(tokens);
   const encrypted = await encrypt(json, env.ENCRYPTION_KEY);
   await env.GDOCS_TOKENS.put(passphraseHash, encrypted);
@@ -28,17 +24,14 @@ export async function storeTokens(
 /**
  * Retrieves and decrypts tokens for a passphrase hash
  */
-export async function getTokens(
-  env: Env,
-  passphraseHash: string,
-): Promise<Tokens | null> {
+export async function getTokens(env: Env, passphraseHash: string): Promise<Tokens | null> {
   const encrypted = await env.GDOCS_TOKENS.get(passphraseHash);
   if (!encrypted) return null;
 
   try {
     const json = await decrypt(encrypted, env.ENCRYPTION_KEY);
     return JSON.parse(json) as Tokens;
-  } catch (err) {
+  } catch {
     throw Errors.InternalError('Failed to decrypt tokens');
   }
 }

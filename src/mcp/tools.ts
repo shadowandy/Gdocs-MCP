@@ -2,8 +2,6 @@
  * MCP Tool Definitions
  */
 
-import { z } from 'zod';
-
 export const ToolDefinitions = {
   google_docs_read: {
     description: 'Read a Google Doc and convert it to Markdown',

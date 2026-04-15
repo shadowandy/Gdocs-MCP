@@ -13,7 +13,8 @@ export async function generateAuthUrl(env: Env, state: string): Promise<string> 
     client_id: env.GOOGLE_CLIENT_ID,
     redirect_uri: env.REDIRECT_URI,
     response_type: 'code',
-    scope: 'https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.readonly',
+    scope:
+      'https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.readonly',
     access_type: 'offline',
     prompt: 'consent',
     state,
