@@ -104,15 +104,36 @@ npx wrangler secret put ENCRYPTION_KEY
 
 ---
 
-## 📝 Phase 6: Connect to Claude.ai
+## 📝 Phase 6: Connect to Claude
 
-1. **Register your account:**
-   Visit `https://your-worker-url.dev/auth/register` in your browser.
-2. **Login with Google:**
-   Follow the prompts. Once finished, the page will display a **Passphrase** (six random words).
-   **🚨 COPY THIS NOW. It will never be shown again.**
-3. **Configure Claude Desktop:**
-   Open your Claude Desktop configuration file (usually `~/Library/Application Support/Claude/claude_desktop_config.json` on Mac):
+### 1. Register your account
+Visit `https://your-worker-url.dev/auth/register` in your browser. Follow the prompts to login with Google. Once finished, the page will display a **Passphrase** (six random words).
+
+**🚨 COPY THIS NOW. It will never be shown again.**
+
+---
+
+### Option A: Connect via Claude Web (Claude.ai)
+_Best for using Google Docs directly in your browser._
+
+1. Go to [Claude.ai](https://claude.ai).
+2. Click on your profile icon (bottom-left) and select **Settings**.
+3. Navigate to **MCP Servers** (if available) or **Tools**.
+4. Click **Add Server** and choose **SSE** (Server-Sent Events).
+5. Enter the following:
+   - **Name:** `Google Docs`
+   - **URL:** `https://your-worker-url.dev/mcp/sse?passphrase=word1-word2-word3-word4-word5-word6`
+6. Click **Add**. Claude will now have access to your documents in any chat where the server is enabled.
+
+---
+
+### Option B: Connect via Claude Desktop
+_Best for power users and developers._
+
+1. Open your Claude Desktop configuration file:
+   - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+2. Add the server to the `mcpServers` section:
 
    ```json
    {
@@ -122,14 +143,14 @@ npx wrangler secret put ENCRYPTION_KEY
          "args": [
            "-y",
            "@modelcontextprotocol/inspector",
-           "https://your-worker-url.dev/mcp/sse?passphrase=your-six-word-passphrase"
+           "https://your-worker-url.dev/mcp/sse?passphrase=word1-word2-word3-word4-word5-word6"
          ]
        }
      }
    }
    ```
 
-4. **Restart Claude Desktop.**
+3. **Restart Claude Desktop.**
 
 ---
 
