@@ -22,6 +22,20 @@ export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    // CORS Headers
+    const corsHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-mcp-protocol-version, x-mcp-sdk-version, x-mcp-sdk-name',
+      'Access-Control-Expose-Headers': 'Content-Type, Content-Length',
+      'Access-Control-Max-Age': '86400',
+    };
+
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
     // Validate environment on startup
     const validateEnv = () => {
       const requiredKVs: (keyof Env)[] = ['GDOCS_TOKENS', 'GDOCS_SESSIONS', 'GDOCS_RATELIMIT'];
@@ -43,42 +57,34 @@ export default {
     try {
       validateEnv();
 
+      let response: Response;
+
       // 1. MCP Routing (/mcp/{passphrase}/{sse|messages})
       const mcpMatch = url.pathname.match(/^\/mcp\/([^/]+)\/(sse|messages)$/);
       if (mcpMatch) {
-        const [, passphrase, endpoint] = mcpMatch;
+        const [, passphrase] = mcpMatch;
         const mcpServer = createMcpServer(env);
-
-        if (endpoint === 'sse') {
-          return await handleMcpSseRequest(request, env, mcpServer, passphrase);
-        }
-
-        if (endpoint === 'messages') {
-          return await handleMcpSseRequest(request, env, mcpServer, passphrase);
-        }
+        response = await handleMcpSseRequest(request, env, mcpServer, passphrase);
       }
-
       // 1.1 Explicit rejection for legacy query-based path
-      if (url.pathname === '/mcp/sse' || url.pathname === '/mcp/messages') {
+      else if (url.pathname === '/mcp/sse' || url.pathname === '/mcp/messages') {
         throw Errors.Unauthorized(
           'Legacy query-based authentication is no longer supported. Please use the path-based URL format.',
         );
       }
-
       // 2. Auth Endpoints
       // GET /auth/register -> Redirect to Google
-      if (url.pathname === '/auth/register' && request.method === 'GET') {
+      else if (url.pathname === '/auth/register' && request.method === 'GET') {
         const passphrase = generatePassphrase();
         const state = crypto.randomUUID();
         // Store state -> passphrase mapping for callback
         await env.GDOCS_SESSIONS.put(`state:${state}`, passphrase, { expirationTtl: 600 });
 
         const authUrl = await generateAuthUrl(env, state);
-        return Response.redirect(authUrl);
+        response = Response.redirect(authUrl);
       }
-
       // GET /auth/callback?code=...&state=...
-      if (url.pathname === '/auth/callback' && request.method === 'GET') {
+      else if (url.pathname === '/auth/callback' && request.method === 'GET') {
         const code = url.searchParams.get('code');
         const state = url.searchParams.get('state');
 
@@ -105,7 +111,7 @@ export default {
         // Store the final status for the user to retrieve
         await env.GDOCS_SESSIONS.put(`status:${passphrase}`, 'COMPLETED', { expirationTtl: 3600 });
 
-        return new Response(
+        response = new Response(
           `Authentication successful! Your passphrase is: ${passphrase}\n\nKeep this SECURE. It is the only way to access your account.`,
           {
             status: 200,
@@ -113,36 +119,59 @@ export default {
           },
         );
       }
-
       // GET /auth/status/{passphrase}
-      if (url.pathname.startsWith('/auth/status/') && request.method === 'GET') {
+      else if (url.pathname.startsWith('/auth/status/') && request.method === 'GET') {
         const passphrase = url.pathname.replace('/auth/status/', '');
         const status = await env.GDOCS_SESSIONS.get(`status:${passphrase}`);
 
         if (!status) {
-          return new Response(JSON.stringify({ status: 'NOT_FOUND' }), {
+          response = new Response(JSON.stringify({ status: 'NOT_FOUND' }), {
             status: 404,
             headers: { 'Content-Type': 'application/json' },
           });
+        } else {
+          response = new Response(JSON.stringify({ status }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
         }
-
-        return new Response(JSON.stringify({ status }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
+      } else {
+        response = new Response('Not Found', { status: 404 });
       }
 
-      // 404
-      return new Response('Not Found', { status: 404 });
+      // Add CORS headers to the response
+      // Cloudflare Workers Response objects can have their headers modified if they are newly created
+      // Or we can create a new response with the augmented headers
+      const finalHeaders = new Headers(response.headers);
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        finalHeaders.set(key, value);
+      });
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: finalHeaders,
+      });
     } catch (err: any) {
       log('error', 'Unhandled fetch error', { error: err.message, stack: err.stack });
-      if (err.statusCode) {
-        return new Response(JSON.stringify(err.toJSON()), {
-          status: err.statusCode,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-      return new Response(`Internal Server Error: ${err.message}`, { status: 500 });
+      const errorResponse = err.statusCode
+        ? new Response(JSON.stringify(err.toJSON()), {
+            status: err.statusCode,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        : new Response(`Internal Server Error: ${err.message}`, { status: 500 });
+
+      // Add CORS to error response too
+      const finalHeaders = new Headers(errorResponse.headers);
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        finalHeaders.set(key, value);
+      });
+
+      return new Response(errorResponse.body, {
+        status: errorResponse.status,
+        statusText: errorResponse.statusText,
+        headers: finalHeaders,
+      });
     }
   },
 };

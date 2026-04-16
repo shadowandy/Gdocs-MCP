@@ -124,14 +124,23 @@ export async function handleMcpSseRequest(
     return new Response('Missing passphrase', { status: 401 });
   }
 
-  const transport = new SSEServerTransport(`/mcp/${finalPassphrase}/messages`, request);
+  // The message endpoint the client should use
+  const messageEndpoint = `/mcp/${finalPassphrase}/messages`;
+  const transport = new SSEServerTransport(messageEndpoint, request);
   transportPassphrases.set(transport, finalPassphrase);
 
-  await server.connect(transport);
-
-  log('info', 'MCP connection established', {
-    passphrase: finalPassphrase.substring(0, 5) + '...',
-  });
-
-  return (transport as any).createResponse();
+  if (request.method === 'GET') {
+    await server.connect(transport);
+    log('info', 'MCP SSE connection established', {
+      passphrase: finalPassphrase.substring(0, 5) + '...',
+    });
+    return (transport as any).createResponse();
+  } else if (request.method === 'POST') {
+    // For POST requests, the transport needs to handle the incoming message
+    // We still need to connect it to the server instance
+    await server.connect(transport);
+    return (transport as any).handlePostMessage(request.headers, request.body);
+  } else {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
 }
