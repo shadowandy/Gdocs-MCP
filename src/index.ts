@@ -26,9 +26,11 @@ export default {
     const corsHeaders: Record<string, string> = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, x-mcp-protocol-version, x-mcp-sdk-version, x-mcp-sdk-name',
-      'Access-Control-Expose-Headers': 'Content-Type, Content-Length',
+      'Access-Control-Allow-Headers':
+        'Content-Type, x-mcp-protocol-version, x-mcp-sdk-version, x-mcp-sdk-name',
+      'Access-Control-Expose-Headers': 'Content-Type, Content-Length, Link, X-Mcp-Session-Id',
       'Access-Control-Max-Age': '86400',
+      'Access-Control-Allow-Private-Network': 'true',
     };
 
     // Handle CORS preflight

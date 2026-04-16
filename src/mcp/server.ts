@@ -3,7 +3,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { log, Errors } from '../utils/errors';
 import { ToolDefinitions } from './tools';
 import { getTokens, refreshIfNeeded } from '../auth/tokens';
@@ -118,28 +118,33 @@ export async function handleMcpSseRequest(
   server: McpServer,
   passphrase?: string,
 ): Promise<Response> {
-  const finalPassphrase = passphrase || new URL(request.url).searchParams.get('passphrase');
+  const url = new URL(request.url);
+  const finalPassphrase = passphrase || url.searchParams.get('passphrase');
 
   if (!finalPassphrase) {
     return new Response('Missing passphrase', { status: 401 });
   }
 
-  // The message endpoint the client should use
-  const url = new URL(request.url);
-  const messageEndpoint = `${url.origin}/mcp/${finalPassphrase}/messages`;
-  const transport = new SSEServerTransport(messageEndpoint, request);
+  // Use WebStandardStreamableHTTPServerTransport which is natively compatible with Fetch API (Workers)
+  // We use the passphrase as the session identifier to maintain isolation
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    sessionIdGenerator: () => finalPassphrase,
+  });
+
   transportPassphrases.set(transport, finalPassphrase);
 
-  if (request.method === 'GET' && url.pathname.endsWith('/sse')) {
+  try {
     await server.connect(transport);
-    log('info', 'MCP SSE connection established', {
-      passphrase: finalPassphrase.substring(0, 5) + '...',
+    // WebStandardStreamableHTTPServerTransport.handleRequest handles GET, POST, DELETE automatically
+    return await transport.handleRequest(request);
+  } catch (err: any) {
+    console.error('MCP transport handleRequest error:', err);
+    log('error', 'MCP transport handleRequest error', {
+      error: err.message,
+      stack: err.stack,
+      url: request.url,
+      method: request.method,
     });
-    return (transport as any).createResponse();
-  } else if (request.method === 'POST' && url.pathname.endsWith('/messages')) {
-    // For POST requests to the messages endpoint
-    return (transport as any).handlePostMessage(request.headers, request.body);
-  } else {
-    return new Response('Not Found', { status: 404 });
+    return new Response(`Transport Error: ${err.message}\nStack: ${err.stack}`, { status: 500 });
   }
 }
