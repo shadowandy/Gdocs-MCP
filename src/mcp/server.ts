@@ -125,7 +125,9 @@ export async function handleMcpSseRequest(
   }
 
   // The message endpoint the client should use
-  const messageEndpoint = `/mcp/${finalPassphrase}/messages`;
+  // SSEServerTransport might need a full URL if relative path resolution is failing in Workers
+  const url = new URL(request.url);
+  const messageEndpoint = `${url.origin}/mcp/${finalPassphrase}/messages`;
   const transport = new SSEServerTransport(messageEndpoint, request);
   transportPassphrases.set(transport, finalPassphrase);
 
@@ -134,6 +136,7 @@ export async function handleMcpSseRequest(
     log('info', 'MCP SSE connection established', {
       passphrase: finalPassphrase.substring(0, 5) + '...',
     });
+    // transport.createResponse() generates the EventStream response
     return (transport as any).createResponse();
   } else if (request.method === 'POST') {
     // For POST requests, the transport needs to handle the incoming message
