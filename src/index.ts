@@ -60,7 +60,7 @@ export default {
       let response: Response;
 
       // 1. MCP Routing (/mcp/{passphrase}/{sse|messages})
-      const mcpMatch = url.pathname.match(/^\/mcp\/([^/]+)\/(sse|messages)$/);
+      const mcpMatch = url.pathname.match(/^\/mcp\/([^/]+)\/(sse|messages)/);
       if (mcpMatch) {
         const [, passphrase] = mcpMatch;
         const mcpServer = createMcpServer(env);
