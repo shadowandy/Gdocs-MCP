@@ -1,8 +1,8 @@
 /**
- * AES-256-GCM Encryption/Decryption using Web Crypto API
+ * AES-GCM Encryption/Decryption using Web Crypto API
  */
 
-const ALGORITHM = 'AES-256-GCM';
+const ALGORITHM = 'AES-GCM';
 const IV_LENGTH = 12; // Standard for GCM
 const AUTH_TAG_LENGTH = 128; // Standard for GCM
 
