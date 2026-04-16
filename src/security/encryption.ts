@@ -7,11 +7,15 @@ const IV_LENGTH = 12; // Standard for GCM
 const AUTH_TAG_LENGTH = 128; // Standard for GCM
 
 /**
- * Gets the crypto key from the base64 encoded secret
+ * Gets the crypto key by hashing the secret to ensure it is always 256 bits
  */
 async function getCryptoKey(secret: string): Promise<CryptoKey> {
-  const rawKey = Uint8Array.from(atob(secret), (c) => c.charCodeAt(0));
-  return crypto.subtle.importKey('raw', rawKey, { name: ALGORITHM }, false, ['encrypt', 'decrypt']);
+  const msgUint8 = new TextEncoder().encode(secret);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  return crypto.subtle.importKey('raw', hashBuffer, { name: ALGORITHM }, false, [
+    'encrypt',
+    'decrypt',
+  ]);
 }
 
 /**
