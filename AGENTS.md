@@ -2,14 +2,18 @@
 
 ## Project Status: ✅ MVP Complete & CI Enabled (Phase 7)
 
-All core functional phases and user stories are fully implemented, tested, and verified. The project now includes a robust CI/CD pipeline:
+All core functional phases and user stories are fully implemented, tested, and verified. The project
+now includes a robust CI/CD pipeline:
 
-- **Phase 1-2 (Foundational):** Secure infrastructure, encryption (AES-256-GCM), and rate limiting are operational.
-- **Phase 3 (User Story 1):** Multi-tenant OAuth2 registration and passphrase-based authentication are complete.
+- **Phase 1-2 (Foundational):** Secure infrastructure, encryption (AES-256-GCM), and rate limiting
+  are operational.
+- **Phase 3 (User Story 1):** Multi-tenant OAuth2 registration and passphrase-based authentication
+  are complete.
 - **Phase 4 (User Story 2):** Two-pass Markdown-to-Docs conversion (Read/Write) is fully functional.
 - **Phase 5 (User Story 3):** Precision section updates via heading matching are operational.
 - **Phase 6 (Polish):** Documentation and security audits are finished.
-- **Phase 7 (Ops):** GitHub Actions CI pipeline, TypeScript strict mode, and linting/formatting standards established.
+- **Phase 7 (Ops):** GitHub Actions CI pipeline, TypeScript strict mode, and linting/formatting
+  standards established.
 
 ---
 
@@ -41,13 +45,15 @@ All core functional phases and user stories are fully implemented, tested, and v
 
 - **Encryption:** AES-256-GCM is the only permitted encryption for tokens.
 - **Isolation:** Never leak or share credentials across passphrase scopes.
-- **Input:** Document URLs must be regex-validated to ensure they match `docs.google.com/document/d/{id}`.
+- **Input:** Document URLs must be regex-validated to ensure they match
+  `docs.google.com/document/d/{id}`.
 
 ## Development Principles
 
 - **TDD:** Write tests for conversion logic before implementation.
 - **Surgical Changes:** Minimize diffs and maintain existing architectural patterns.
-- **Performance:** Be mindful of Cloudflare Worker CPU and Memory limits (especially during complex markdown parsing).
+- **Performance:** Be mindful of Cloudflare Worker CPU and Memory limits (especially during complex
+  markdown parsing).
 
 ## Key Files & Directories
 

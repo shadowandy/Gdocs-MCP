@@ -1,8 +1,8 @@
 # Specification Quality Checklist: Passphrase in URL Path
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-04-15
-**Feature**: [specs/001-passphrase-in-path/spec.md](specs/001-passphrase-in-path/spec.md)
+**Created**: 2026-04-15 **Feature**:
+[specs/001-passphrase-in-path/spec.md](specs/001-passphrase-in-path/spec.md)
 
 ## Content Quality
 
@@ -31,4 +31,5 @@
 
 ## Notes
 
-- All clarifications resolved. Immediate migration strategy adopted (Legacy query parameters will no longer be supported).
+- All clarifications resolved. Immediate migration strategy adopted (Legacy query parameters will no
+  longer be supported).

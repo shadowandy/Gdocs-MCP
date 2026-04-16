@@ -2,7 +2,9 @@
 
 ## 1. Overview
 
-A multi-tenant MCP (Model Context Protocol) server running on Cloudflare Workers that enables Claude.ai to read and write Google Docs. Users authenticate via Google OAuth2, and the server converts markdown content from Claude into native Google Docs formatting via the Google Docs API.
+A multi-tenant MCP (Model Context Protocol) server running on Cloudflare Workers that enables
+Claude.ai to read and write Google Docs. Users authenticate via Google OAuth2, and the server
+converts markdown content from Claude into native Google Docs formatting via the Google Docs API.
 
 ### Key design decisions
 
@@ -182,7 +184,8 @@ Claude.ai                       CF Worker                    Google APIs
 
 ## 4. Markdown → Google Docs Conversion
 
-The Google Docs API operates on `batchUpdate` with a list of requests. Each request operates on character indices within the document. The converter must:
+The Google Docs API operates on `batchUpdate` with a list of requests. Each request operates on
+character indices within the document. The converter must:
 
 1. Parse markdown into an AST (abstract syntax tree)
 2. Generate `insertText` requests for content
@@ -223,7 +226,8 @@ The converter works in **two passes**:
 
 - Walk the AST again, this time emitting style requests
 - Each style request references the character range from Pass 1
-- Requests are ordered by descending index (Google Docs API requirement: later indices first to avoid shifting)
+- Requests are ordered by descending index (Google Docs API requirement: later indices first to
+  avoid shifting)
 
 **Tables** are handled separately:
 
@@ -236,9 +240,11 @@ The converter works in **two passes**:
 For `google_docs_update_section`:
 
 1. `documents.get` to retrieve the full document structure
-2. Walk the `body.content` array to find the paragraph matching `section_heading` with a heading style
+2. Walk the `body.content` array to find the paragraph matching `section_heading` with a heading
+   style
 3. Record its `startIndex`
-4. Continue walking to find the next heading of the same or higher level (e.g., if section is H2, find next H1 or H2)
+4. Continue walking to find the next heading of the same or higher level (e.g., if section is H2,
+   find next H1 or H2)
 5. Record that `startIndex` as the section end
 6. `deleteContentRange` from section start (after the heading) to section end
 7. Insert new content at the deletion point using the markdown converter
@@ -426,7 +432,8 @@ gdocs-mcp-server/
 
 ### Example usage in Claude:
 
-> **User**: "Write this trip itinerary to my Google Doc: https://docs.google.com/document/d/1abc.../edit"
+> **User**: "Write this trip itinerary to my Google Doc:
+> https://docs.google.com/document/d/1abc.../edit"
 >
 > **Claude**: _Calls `google_docs_write` with the itinerary markdown, mode="replace"_
 >
@@ -452,10 +459,12 @@ gdocs-mcp-server/
 
 ### Current limitations
 
-- **Images**: Google Docs API cannot insert images via `batchUpdate` from markdown `![](url)` syntax. Would require Drive API upload + `insertInlineImage`.
+- **Images**: Google Docs API cannot insert images via `batchUpdate` from markdown `![](url)`
+  syntax. Would require Drive API upload + `insertInlineImage`.
 - **Complex tables**: Merged cells and nested tables are not supported.
 - **Comments/suggestions**: Read-only; creating suggestions requires additional scope.
-- **Real-time collaboration**: The Worker does a read-modify-write; concurrent edits by other users between read and write could cause conflicts.
+- **Real-time collaboration**: The Worker does a read-modify-write; concurrent edits by other users
+  between read and write could cause conflicts.
 
 ### Future enhancements
 

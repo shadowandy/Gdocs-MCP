@@ -24,4 +24,5 @@ Send JSON-RPC messages to the server for a specific session.
 ## Deprecated Endpoints (REMOVED)
 
 - `GET /mcp/sse?passphrase=...`: No longer supported.
-- `POST /mcp/messages`: No longer supported (unless passphrase was somehow associated, but path-based is now mandatory).
+- `POST /mcp/messages`: No longer supported (unless passphrase was somehow associated, but
+  path-based is now mandatory).

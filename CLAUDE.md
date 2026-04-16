@@ -2,7 +2,8 @@
 
 ## Current Status: ✅ Core Tools Functional & CI Enabled
 
-All core tools are fully implemented and verified. The project is backed by a CI pipeline ensuring all changes pass formatting, linting, and tests.
+All core tools are fully implemented and verified. The project is backed by a CI pipeline ensuring
+all changes pass formatting, linting, and tests.
 
 ---
 
@@ -26,18 +27,25 @@ The server handles the conversion from Markdown to native Google Docs formatting
 
 ### 3. Precision Updates
 
-For large documents, use `google_docs_update_section` to target specific headings. This minimizes API overhead and reduces the risk of overwriting unrelated content. Ensure the `section_heading` is an exact match of the heading in the document.
+For large documents, use `google_docs_update_section` to target specific headings. This minimizes
+API overhead and reduces the risk of overwriting unrelated content. Ensure the `section_heading` is
+an exact match of the heading in the document.
 
 ### 4. Authentication
 
 If a tool call fails with an authentication error:
 
 - Direct the user to the `/auth/register` page to reconnect their Google account.
-- Remind the user that their unique passphrase must be included in the URL path (e.g., `/mcp/{passphrase}/sse`).
+- Remind the user that their unique passphrase must be included in the URL path (e.g.,
+  `/mcp/{passphrase}/sse`).
 
 ## Operational Standards
 
-- **Wait for Confirmation:** Always confirm with the user before performing a `mode="replace"` operation on an existing document.
-- **Explain Formatting:** If you're creating a complex document, briefly explain how the Markdown will be rendered (e.g., "I'll use Heading 1 for the title and a table for the itinerary").
-- **Error Handling:** If a Google Docs URL is invalid, inform the user and request the correct format: `https://docs.google.com/document/d/{doc_id}/edit`.
-- **CI Compliance:** Ensure all code changes pass `npm run lint`, `npm run typecheck`, and `npm test` before concluding a task.
+- **Wait for Confirmation:** Always confirm with the user before performing a `mode="replace"`
+  operation on an existing document.
+- **Explain Formatting:** If you're creating a complex document, briefly explain how the Markdown
+  will be rendered (e.g., "I'll use Heading 1 for the title and a table for the itinerary").
+- **Error Handling:** If a Google Docs URL is invalid, inform the user and request the correct
+  format: `https://docs.google.com/document/d/{doc_id}/edit`.
+- **CI Compliance:** Ensure all code changes pass `npm run lint`, `npm run typecheck`, and
+  `npm test` before concluding a task.

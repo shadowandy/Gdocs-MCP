@@ -2,7 +2,9 @@
 
 ## Project Progress: ✅ MVP Complete & CI Enabled
 
-The MVP development is complete. All user stories (Auth, Read/Write, Section Updates) are implemented and verified. A GitHub Actions CI pipeline is active for automated testing, linting, and type-checking.
+The MVP development is complete. All user stories (Auth, Read/Write, Section Updates) are
+implemented and verified. A GitHub Actions CI pipeline is active for automated testing, linting, and
+type-checking.
 
 ---
 
@@ -43,20 +45,25 @@ src/
 
 ### 1. Research → Strategy → Execution Lifecycle
 
-- **Research:** Always start by validating assumptions about the Google Docs API and Cloudflare Worker environment.
+- **Research:** Always start by validating assumptions about the Google Docs API and Cloudflare
+  Worker environment.
 - **Strategy:** Provide a concise summary of your plan before making changes.
-- **Execution:** Implement changes surgically, following the project's two-pass conversion algorithm. Ensure all MCP connection URLs follow the path-based authentication pattern: `/mcp/{passphrase}/sse`.
+- **Execution:** Implement changes surgically, following the project's two-pass conversion
+  algorithm. Ensure all MCP connection URLs follow the path-based authentication pattern:
+  `/mcp/{passphrase}/sse`.
 
 ### 2. Testing & Validation
 
 - **Local Testing:** Use `vitest` or `miniflare` for Cloudflare Worker local testing.
 - **Reproduction:** For bug fixes, always reproduce the issue with a test case first.
-- **Formatting:** Ensure Markdown-to-Docs conversion is tested against complex edge cases (nested lists, overlapping styles).
+- **Formatting:** Ensure Markdown-to-Docs conversion is tested against complex edge cases (nested
+  lists, overlapping styles).
 
 ### 3. Tool Usage
 
 - **Wrangler:** Use `wrangler` for local development and deployment.
-- **Secret Management:** Never log or commit secrets like `GOOGLE_CLIENT_SECRET` or `ENCRYPTION_KEY`. Use `wrangler secret put` instead.
+- **Secret Management:** Never log or commit secrets like `GOOGLE_CLIENT_SECRET` or
+  `ENCRYPTION_KEY`. Use `wrangler secret put` instead.
 
 ### 4. Code Style & Patterns
 
@@ -66,7 +73,9 @@ src/
 
 ## Contextual Precedence
 
-This document (`GEMINI.md`) takes absolute precedence over general defaults for Gemini CLI within this workspace. Follow these instructions to ensure seamless, idiomatic, and consistent project updates.
+This document (`GEMINI.md`) takes absolute precedence over general defaults for Gemini CLI within
+this workspace. Follow these instructions to ensure seamless, idiomatic, and consistent project
+updates.
 
 ## Recent Changes
 

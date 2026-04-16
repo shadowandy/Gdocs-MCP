@@ -17,5 +17,7 @@ The primary interface for client connectivity.
 ## Validation Rules
 
 1. **Passphrase Extraction**: Must be the second segment after `/mcp/`.
-2. **Endpoint Validation**: Must be exactly `sse` for the EventSource connection or `messages` for POST requests.
-3. **Passphrase Format**: Must be a non-empty string. Hashing and verification remain unchanged in the `auth` module.
+2. **Endpoint Validation**: Must be exactly `sse` for the EventSource connection or `messages` for
+   POST requests.
+3. **Passphrase Format**: Must be a non-empty string. Hashing and verification remain unchanged in
+   the `auth` module.
