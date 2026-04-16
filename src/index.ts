@@ -22,7 +22,27 @@ export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    // Validate environment on startup
+    const validateEnv = () => {
+      const requiredKVs: (keyof Env)[] = ['GDOCS_TOKENS', 'GDOCS_SESSIONS', 'GDOCS_RATELIMIT'];
+      const requiredVars: (keyof Env)[] = [
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'REDIRECT_URI',
+        'ENCRYPTION_KEY',
+      ];
+
+      for (const kv of requiredKVs) {
+        if (!env[kv]) throw new Error(`Missing KV binding: ${kv}`);
+      }
+      for (const v of requiredVars) {
+        if (!env[v]) throw new Error(`Missing environment variable: ${v}`);
+      }
+    };
+
     try {
+      validateEnv();
+
       // 1. MCP Routing (/mcp/{passphrase}/{sse|messages})
       const mcpMatch = url.pathname.match(/^\/mcp\/([^/]+)\/(sse|messages)$/);
       if (mcpMatch) {
@@ -122,7 +142,7 @@ export default {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      return new Response('Internal Server Error', { status: 500 });
+      return new Response(`Internal Server Error: ${err.message}`, { status: 500 });
     }
   },
 };
