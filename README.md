@@ -92,9 +92,9 @@ npx wrangler secret put ENCRYPTION_KEY
    for each:
 
    ```bash
-   npx wrangler kv:namespace create GDOCS_TOKENS
-   npx wrangler kv:namespace create GDOCS_SESSIONS
-   npx wrangler kv:namespace create GDOCS_RATELIMIT
+   npx wrangler kv namespace create GDOCS_TOKENS
+   npx wrangler kv namespace create GDOCS_SESSIONS
+   npx wrangler kv namespace create GDOCS_RATELIMIT
    ```
 
 2. **Update `wrangler.toml`:** Open the `wrangler.toml` file in your code editor and paste the IDs
