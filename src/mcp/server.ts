@@ -20,6 +20,7 @@ import { updateSection } from '../google/docs-section';
 import { Env } from '../index';
 
 // Map to associate transports with passphrases
+// Using WeakMap to prevent memory leaks when transports are destroyed
 const transportPassphrases = new WeakMap<any, string>();
 
 export function createMcpServer(env: Env) {
