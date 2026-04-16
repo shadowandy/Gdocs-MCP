@@ -1,4 +1,4 @@
-# 📘 Google Docs MCP Server: The Complete Setup Guide
+# Google Docs MCP Server: The Complete Setup Guide
 
 This guide will help you set up your own private Google Docs MCP server on Cloudflare Workers. Once
 finished, Claude.ai will be able to read, write, and update your Google Docs directly.
