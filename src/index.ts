@@ -23,10 +23,26 @@ export default {
     const url = new URL(request.url);
 
     try {
-      // 1. MCP SSE Connection
-      if (url.pathname === '/mcp/sse') {
+      // 1. MCP Routing (/mcp/{passphrase}/{sse|messages})
+      const mcpMatch = url.pathname.match(/^\/mcp\/([^/]+)\/(sse|messages)$/);
+      if (mcpMatch) {
+        const [, passphrase, endpoint] = mcpMatch;
         const mcpServer = createMcpServer(env);
-        return await handleMcpSseRequest(request, env, mcpServer);
+
+        if (endpoint === 'sse') {
+          return await handleMcpSseRequest(request, env, mcpServer, passphrase);
+        }
+
+        if (endpoint === 'messages') {
+          return await handleMcpSseRequest(request, env, mcpServer, passphrase);
+        }
+      }
+
+      // 1.1 Explicit rejection for legacy query-based path
+      if (url.pathname === '/mcp/sse' || url.pathname === '/mcp/messages') {
+        throw Errors.Unauthorized(
+          'Legacy query-based authentication is no longer supported. Please use the path-based URL format.',
+        );
       }
 
       // 2. Auth Endpoints

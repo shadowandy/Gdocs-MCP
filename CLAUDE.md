@@ -33,7 +33,7 @@ For large documents, use `google_docs_update_section` to target specific heading
 If a tool call fails with an authentication error:
 
 - Direct the user to the `/auth/register` page to reconnect their Google account.
-- Remind the user that their unique passphrase is required in the MCP endpoint URL.
+- Remind the user that their unique passphrase must be included in the URL path (e.g., `/mcp/{passphrase}/sse`).
 
 ## Operational Standards
 

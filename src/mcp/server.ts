@@ -73,7 +73,10 @@ export function createMcpServer(env: Env) {
   server.tool(
     'google_docs_update_section',
     ToolDefinitions.google_docs_update_section.inputSchema.properties as any,
-    (async ({ url, heading, markdown }: { url: string; heading: string; markdown: string }, extra: any) => {
+    (async (
+      { url, heading, markdown }: { url: string; heading: string; markdown: string },
+      extra: any,
+    ) => {
       const transport = (extra as any).transport;
       const passphrase = transportPassphrases.get(transport);
       if (!passphrase) throw Errors.Unauthorized('Missing authentication');
@@ -112,20 +115,22 @@ export async function handleMcpSseRequest(
   request: Request,
   env: Env,
   server: McpServer,
+  passphrase?: string,
 ): Promise<Response> {
-  const { searchParams } = new URL(request.url);
-  const passphrase = searchParams.get('passphrase');
+  const finalPassphrase = passphrase || new URL(request.url).searchParams.get('passphrase');
 
-  if (!passphrase) {
+  if (!finalPassphrase) {
     return new Response('Missing passphrase', { status: 401 });
   }
 
-  const transport = new SSEServerTransport('/mcp/messages', request);
-  transportPassphrases.set(transport, passphrase);
+  const transport = new SSEServerTransport(`/mcp/${finalPassphrase}/messages`, request);
+  transportPassphrases.set(transport, finalPassphrase);
 
   await server.connect(transport);
 
-  log('info', 'MCP connection established', { passphrase: passphrase.substring(0, 5) + '...' });
+  log('info', 'MCP connection established', {
+    passphrase: finalPassphrase.substring(0, 5) + '...',
+  });
 
   return (transport as any).createResponse();
 }

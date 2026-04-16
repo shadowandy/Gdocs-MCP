@@ -107,6 +107,7 @@ npx wrangler secret put ENCRYPTION_KEY
 ## 📝 Phase 6: Connect to Claude
 
 ### 1. Register your account
+
 Visit `https://your-worker-url.dev/auth/register` in your browser. Follow the prompts to login with Google. Once finished, the page will display a **Passphrase** (six random words).
 
 **🚨 COPY THIS NOW. It will never be shown again.**
@@ -114,6 +115,7 @@ Visit `https://your-worker-url.dev/auth/register` in your browser. Follow the pr
 ---
 
 ### Option A: Connect via Claude Web (Claude.ai)
+
 _Best for using Google Docs directly in your browser._
 
 1. Go to [Claude.ai](https://claude.ai).
@@ -122,12 +124,13 @@ _Best for using Google Docs directly in your browser._
 4. Click **Add Server** and choose **SSE** (Server-Sent Events).
 5. Enter the following:
    - **Name:** `Google Docs`
-   - **URL:** `https://your-worker-url.dev/mcp/sse?passphrase=word1-word2-word3-word4-word5-word6`
+   - **URL:** `https://your-worker-url.dev/mcp/word1-word2-word3-word4-word5-word6/sse`
 6. Click **Add**. Claude will now have access to your documents in any chat where the server is enabled.
 
 ---
 
 ### Option B: Connect via Claude Desktop
+
 _Best for power users and developers._
 
 1. Open your Claude Desktop configuration file:
@@ -143,7 +146,7 @@ _Best for power users and developers._
          "args": [
            "-y",
            "@modelcontextprotocol/inspector",
-           "https://your-worker-url.dev/mcp/sse?passphrase=word1-word2-word3-word4-word5-word6"
+           "https://your-worker-url.dev/mcp/word1-word2-word3-word4-word5-word6/sse"
          ]
        }
      }
@@ -156,6 +159,6 @@ _Best for power users and developers._
 
 ## 🛠️ Troubleshooting
 
-- **"Invalid Passphrase"**: Ensure you have no trailing spaces in your passphrase in the config file.
+- **"Invalid Passphrase"**: Ensure you have no trailing spaces in your passphrase in the URL path.
 - **"Google hasn't verified this app"**: This is normal for private apps. Click "Advanced" -> "Go to [App Name] (unsafe)".
-- **404 Not Found**: Ensure you are using the `/mcp/sse` path in your Claude configuration.
+- **401 Unauthorized**: Ensure your passphrase is correct and included in the URL path: `/mcp/{passphrase}/sse`.

@@ -8,6 +8,9 @@ The MVP development is complete. All user stories (Auth, Read/Write, Section Upd
 
 ## Active Technologies
 
+- TypeScript / ESNex + Cloudflare Workers, @modelcontextprotocol/sdk (001-passphrase-in-path)
+- Cloudflare KV (GDOCS_TOKENS, GDOCS_SESSIONS, GDOCS_RATELIMIT) (001-passphrase-in-path)
+
 - **Runtime**: Cloudflare Workers
 - **Framework**: Model Context Protocol (MCP) SDK
 - **CI/CD**: GitHub Actions
@@ -42,7 +45,7 @@ src/
 
 - **Research:** Always start by validating assumptions about the Google Docs API and Cloudflare Worker environment.
 - **Strategy:** Provide a concise summary of your plan before making changes.
-- **Execution:** Implement changes surgically, following the project's two-pass conversion algorithm.
+- **Execution:** Implement changes surgically, following the project's two-pass conversion algorithm. Ensure all MCP connection URLs follow the path-based authentication pattern: `/mcp/{passphrase}/sse`.
 
 ### 2. Testing & Validation
 
@@ -64,3 +67,7 @@ src/
 ## Contextual Precedence
 
 This document (`GEMINI.md`) takes absolute precedence over general defaults for Gemini CLI within this workspace. Follow these instructions to ensure seamless, idiomatic, and consistent project updates.
+
+## Recent Changes
+
+- 001-passphrase-in-path: Added TypeScript / ESNex + Cloudflare Workers, @modelcontextprotocol/sdk
